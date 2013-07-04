@@ -20,7 +20,7 @@ position:absolute;left:0%;top:0%;width:100%;height:100%;background-color:black;z
 	  #panoramaWindow{
 	  position:absolute;background-color:black;z-index:50;height:100%;	
 	  }
-	  #closeButton{
+	  .closeButton{
 	  width:40px;height:40px;position:absolute;right:0px;top:0px;
 	  }
 
@@ -68,9 +68,15 @@ $.mobile.allowCrossDomainPages = true;
 <body>
 
 <div id="mainPage" data-role='page' style="overflow:hidden;">
+<div id="infoPage" style="width:100%;height:100%;background-color:white;position:absolute;z-index:10000;display:none;">
+	<iframe id="infoPageFrame" src="" frameBorder="0"  style="width:100%;height:100%;">
+	</iframe>
+	<img class="closeButton" src="closeButton.png" onclick="closeInfoPage()"/>
+</div>
+
 <div id="panoramaBorders">
 	<iframe id="panoramaWindow" src="" frameBorder="0"></iframe>
-	<img id="closeButton" src="closeButton.png" onclick="closePanorama()"/>
+	<img class="closeButton" src="closeButton.png" onclick="closePanorama()"/>
 </div>
 <div data-role="panel" id="mypanel" data-position="right" data-display="overlay" data-theme="a">
 <div id="listC" class="scrollable">
@@ -141,7 +147,7 @@ $.mobile.allowCrossDomainPages = true;
                             <button onclick="openPano()" data-role="button" data-inline="true"   data-icon="refresh" data-theme="a" data-corners="false">Panorama</button>
                         </li>
 						<li>
-                            <button onclick="openPano()" data-role="button" data-inline="true"   data-icon="info" data-theme="a" data-corners="false">Bilgi/Info</button>
+                            <button onclick="openInfo()" data-role="button" data-inline="true"   data-icon="info" data-theme="a" data-corners="false">Bilgi/Info</button>
                         </li>
                     </ul>
 </div>
@@ -207,19 +213,17 @@ $.mobile.allowCrossDomainPages = true;
 <h3 style="position:absolute;left:10px;top:2px;z-index:55;">Kız Kulesi</h3>
 </div>
 <script>
-
-
-
 var map;
 var currentPlace;
 var iconBase = 'https://maps.google.com/mapfiles/kml/shapes/';
 var myLatlng = new google.maps.LatLng(41.041962286345125, 29.014862060546854);
-var TPlace = function (name, lat, lon, panoUrl,infoDiv) {
+var TPlace = function (name, lat, lon, panoUrl,infoDiv,infoPageUrl) {
     this.name = name;
     this.lat = lat;
     this.lon = lon;
     this.panoUrl = panoUrl;
 	this.infoDiv = infoDiv;
+	this.infoPageUrl=infoPageUrl;
 };
 var addMarker = function (place) {
     var marker = new google.maps.Marker({
@@ -241,18 +245,19 @@ var addMarker = function (place) {
     });
     return marker;
 }
-var topkapi = new TPlace("Topkapı Sarayı", 41.010631, 28.982767, "topkapiPano",'#topkapiInfoDiv');
-var ayasofya = new TPlace("Ayasofya", 41.008378, 28.98087, "ayasofyaPano",'#ayasofyaInfoDiv');
-var suleymaniye = new TPlace("Süleymaniye Camii", 41.016749, 28.962459, "suleymaniyePano",'#suleymaniyeInfoDiv');
-var sultanahmet = new TPlace("Sultanahmet", 41.008119, 28.975609, "sultanahmetPano",'#sultanahmetInfoDiv');
-var dolmabahce = new TPlace("Dolmabahçe Sarayı", 41.039007, 28.999023, "dolmabahcePano",'#dolmabahceInfoDiv');
-var yerebatan = new TPlace("Yerebatan Sarnıcı", 41.008378, 28.977942, "yerebatanPano",'#yerebatanInfoDiv');
-var arkeoloji = new TPlace("Arkeoloji Müzesi", 41.010852, 28.981622, "arkeolojiPano",'#arkeolojiInfoDiv');
-var kariye = new TPlace("Kariye Müzesi", 41.031303, 28.939167, "kariyePano",'#kariyeInfoDiv');
-var kapalicarsi = new TPlace("Kapalı Çarşı", 41.010837, 28.968442, "kapalicPano",'#kapalicInfoDiv');
-var kizkulesi = new TPlace("Kız Kulesi", 41.021048, 29.004076, "kizkulesiPano",'#kizkulesiInfoDiv');
+var topkapi = new TPlace("Topkapı Sarayı", 41.010631, 28.982767, "topkapiPano",'#topkapiInfoDiv',"infopages/topkapi.html");
+var ayasofya = new TPlace("Ayasofya", 41.008378, 28.98087, "ayasofyaPano",'#ayasofyaInfoDiv',"infopages/ayasofya.html");
+var suleymaniye = new TPlace("Süleymaniye Camii", 41.016749, 28.962459, "suleymaniyePano",'#suleymaniyeInfoDiv',"infopages/suleymaniye.html");
+var sultanahmet = new TPlace("Sultanahmet", 41.008119, 28.975609, "sultanahmetPano",'#sultanahmetInfoDiv',"infopages/sultanahmet.html");
+var dolmabahce = new TPlace("Dolmabahçe Sarayı", 41.039007, 28.999023, "dolmabahcePano",'#dolmabahceInfoDiv',"infopages/dolmabahce.html");
+var yerebatan = new TPlace("Yerebatan Sarnıcı", 41.008378, 28.977942, "yerebatanPano",'#yerebatanInfoDiv',"infopages/yerebatan.html");
+var arkeoloji = new TPlace("Arkeoloji Müzesi", 41.010852, 28.981622, "arkeolojiPano",'#arkeolojiInfoDiv',"infopages/arkeoloji.html");
+var kariye = new TPlace("Kariye Müzesi", 41.031303, 28.939167, "kariyePano",'#kariyeInfoDiv',"infopages/kariye.html");
+var kapalicarsi = new TPlace("Kapalı Çarşı", 41.010837, 28.968442, "kapalicPano",'#kapalicInfoDiv',"infopages/kapalic.html");
+var kizkulesi = new TPlace("Kız Kulesi", 41.021048, 29.004076, "kizkulesiPano",'#kizkulesiInfoDiv',"infopages/kizkulesi.html");
 
 var placesArray = [topkapi, ayasofya, suleymaniye, sultanahmet, dolmabahce, yerebatan, arkeoloji, kariye, kapalicarsi, kizkulesi];
+
 
 function initialize() {
 $.mobile.loading( 'show', {
@@ -279,6 +284,10 @@ $.mobile.loading( 'show', {
     });
     $("#panoramaWindow").width(($(window).width()-50));
 	$("#map-canvas").height($("#pageContent").height());
+	$("#infoPage").height($("#pageContent").height());
+	$("#infoPage").width($("#pageContent").width());
+		$("#infoPageFrame").height($("#pageContent").height());
+	$("#infoPageFrame").width($("#pageContent").width());
 	$("#listC").height($(window).height()*90/100);
 	google.maps.event.trigger(map, 'resize');
 	setTimeout(function(){$.mobile.loading( 'hide');},3000);
@@ -286,12 +295,7 @@ $.mobile.loading( 'show', {
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);
-google.maps.event.addListener(map, 'tilesloaded', function() {
-    alert("tilesLoaded");
-});
-google.maps.event.addListenerOnce(map, 'idle', function(){
-    alert("iddle");
-});
+
 function krpano() {
     return document.getElementById("krpanoSWFObject");
 }
@@ -332,6 +336,10 @@ $(window).resize(function() {
 
     $("#panoramaWindow").width(($(window).width()-50));
 	$("#map-canvas").height($("#pageContent").height());
+	$("#infoPage").height($("#pageContent").height());
+	$("#infoPage").width($("#pageContent").width());
+		$("#infoPageFrame").height($("#pageContent").height());
+	$("#infoPageFrame").width($("#pageContent").width());
 	$("#listC").height($(window).height()*90/100);
 	google.maps.event.trigger(map, 'resize');
 });
@@ -347,6 +355,16 @@ for (var i=0;i<placesArray.length;i++){
 		}
 	}
 
+}
+
+function openInfo(){
+	$("#infoPage").fadeIn();
+	$("#infoPageFrame").attr('src', currentPlace.infoPageUrl); 
+	}
+
+function closeInfoPage(){
+	$('#infoPage').fadeOut();
+	
 }
 </script>
 <style>
