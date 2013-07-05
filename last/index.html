@@ -68,6 +68,7 @@ $.mobile.allowCrossDomainPages = true;
 <body>
 
 <div id="mainPage" data-role='page' style="overflow:hidden;">
+<div id="loadBck" style="width:100%;height:100%;background-color:black;position:absolute;z-index:10001;"></div>
 <div id="infoPage" style="width:100%;height:100%;background-color:white;position:absolute;z-index:10000;display:none;">
 	<iframe id="infoPageFrame" src="" frameBorder="0"  style="width:100%;height:100%;">
 	</iframe>
@@ -284,13 +285,13 @@ $.mobile.loading( 'show', {
     });
     $("#panoramaWindow").width(($(window).width()-50));
 	$("#map-canvas").height($("#pageContent").height());
-	$("#infoPage").height($("#pageContent").height());
+	$("#infoPage").height($(window).height());
 	$("#infoPage").width($("#pageContent").width());
-		$("#infoPageFrame").height($("#pageContent").height());
+		$("#infoPageFrame").height($(window).height());
 	$("#infoPageFrame").width($("#pageContent").width());
-	$("#listC").height($(window).height()*90/100);
+	$("#listC").height($("#pageContent").height());
 	google.maps.event.trigger(map, 'resize');
-	setTimeout(function(){$.mobile.loading( 'hide');},3000);
+	setTimeout(function(){$.mobile.loading( 'hide');$("#loadBck").hide();},3000);
 	
 }
 
@@ -336,11 +337,11 @@ $(window).resize(function() {
 
     $("#panoramaWindow").width(($(window).width()-50));
 	$("#map-canvas").height($("#pageContent").height());
-	$("#infoPage").height($("#pageContent").height());
+	$("#infoPage").height($(window).height());
 	$("#infoPage").width($("#pageContent").width());
 		$("#infoPageFrame").height($("#pageContent").height());
-	$("#infoPageFrame").width($("#pageContent").width());
-	$("#listC").height($(window).height()*90/100);
+	$("#infoPageFrame").width($(window).height());
+	$("#listC").height($("#pageContent").height());
 	google.maps.event.trigger(map, 'resize');
 });
 
@@ -360,10 +361,12 @@ for (var i=0;i<placesArray.length;i++){
 function openInfo(){
 	$("#infoPage").fadeIn();
 	$("#infoPageFrame").attr('src', currentPlace.infoPageUrl); 
+	$("#footer").hide();
 	}
 
 function closeInfoPage(){
 	$('#infoPage').fadeOut();
+	$("#footer").show();
 	
 }
 </script>
@@ -381,6 +384,41 @@ div.ui-loader.ui-body-a {
 	background-repeat: no-repeat;
 
 }
+
+.ui-shadow,
+.ui-btn-up-a,
+.ui-btn-hover-a,
+.ui-btn-down-a,
+.ui-body-b,
+.ui-btn-up-b,
+.ui-btn-hover-b,
+.ui-btn-down-b,
+.ui-bar-c,
+.ui-body-c,
+.ui-btn-up-c,
+.ui-btn-hover-c,
+.ui-btn-down-c,
+.ui-bar-c,
+.ui-body-d,
+.ui-btn-up-d,
+.ui-btn-hover-d,
+.ui-btn-down-d,
+.ui-bar-d,
+.ui-body-e,
+.ui-btn-up-e,
+.ui-btn-hover-e,
+.ui-btn-down-e,
+.ui-bar-e,
+.ui-overlay-shadow,
+.ui-shadow,
+.ui-btn-active,
+.ui-body-a,
+.ui-bar-a {
+ text-shadow: none;
+ box-shadow: none;
+ -webkit-box-shadow: none;
+}
+
 </style>
 </body>
 </html>
