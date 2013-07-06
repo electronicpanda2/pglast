@@ -21,7 +21,7 @@ position:absolute;left:0%;top:0%;width:100%;height:100%;background-color:black;z
 	  position:absolute;background-color:black;z-index:50;height:100%;	
 	  }
 	  .closeButton{
-	  width:40px;height:40px;position:absolute;right:0px;top:0px;
+	  width:40px;height:40px;position:absolute;right:0px;top:0px;z-index:99999;
 	  }
 
 	  #map-canvas{
@@ -283,7 +283,7 @@ $.mobile.loading( 'show', {
         "margin": "0px",
 		'height': $(window).height()-$("#footer").height()
     });
-    $("#panoramaWindow").width(($(window).width()-50));
+    $("#panoramaWindow").width(($(window).width()));
 	$("#map-canvas").height($("#pageContent").height());
 	$("#infoPage").height($(window).height());
 	$("#infoPage").width($("#pageContent").width());
@@ -314,7 +314,7 @@ function embedpanorama(xmlName) {
 }
 
 function openPano() {
-document.getElementById("panoramaWindow").src = "panoramas/" + currentPlace.panoUrl + ".html";
+document.getElementById("panoramaWindow").src = "http://isee.noda.com.tr/panoramas/" + currentPlace.panoUrl + ".html";
 $("#popupDiv").popup("close");
 document.getElementById("map-canvas").style.display="none";
 document.getElementById("panoramaBorders").style.display="block";
@@ -335,7 +335,7 @@ $(window).resize(function() {
     });
 
 
-    $("#panoramaWindow").width(($(window).width()-50));
+    $("#panoramaWindow").width(($(window).width()));
 	$("#map-canvas").height($("#pageContent").height());
 	$("#infoPage").height($(window).height());
 	$("#infoPage").width($("#pageContent").width());
