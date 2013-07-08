@@ -1,0 +1,206 @@
+<krpano version="1.16" onstart="startup();">
+	
+	<!-- use a grid preview pano as background -->
+	<preview type="grid(cube,16,16,512,0xCCCCCC,0xF6F6F6,0x999999);" details="16" />
+
+	<!-- view settings -->
+	<view hlookat="0" vlookat="0" fovtype="VFOV" fov="100" fovmin="60" fovmax="150" />
+
+
+	<!-- use the Flashplayer BEST quality rendering (for nicer rounded-edges of textfield elements) -->
+	<display movequality10="BEST" stillquality10="BEST" />
+	
+	<!-- no default loading bar -->
+	<progress showload="false" showwait="false" />
+
+	
+<progress showload="bar()" showwait="loopings()" /> <image><sphere url="panoimages/3p.jpg" /></image>
+	<!-- define a button style -->
+	<style name="button"
+		url="%SWFPATH%/plugins/textfield.swf"
+		children="false"
+		css="text-align:center; color:#FFFFFF; font-family:Arial; font-weight:bold; font-size:10px;"
+		vcenter="true"
+		backgroundcolor="0x000000" backgroundalpha="0.667" roundedge="10" border="false"
+		shadow="0.1" shadowrange="8" shadowcolor="0xFFFFFF"
+		/>
+		
+	<!-- special IE10 button style - the IE10 Browser has performance problems when rendering rounded-edges and shadows - so disable these for IE and add simple borders instead -->
+	<style name="button" devices="html5+IE"
+		roundedge="0"
+		shadow="0"
+		border="true" bordercolor="0xFFFFFF"
+		/>		
+
+
+	<!-- Flash/HTML5 only logos for some example -->
+	<style name="flashonly" enabled="false" alpha="0.7" devices="html5" />
+	<style name="html5only" enabled="false" alpha="0.7" devices="flash" />
+	<style name="flashonly_logo" url="examples/images/flashlogo80.png" align="rightbottom" scale="0.25" x="-5" y="-5" enabled="false" />
+	<style name="html5only_logo" url="examples/images/html5logo80.png" align="rightbottom" scale="0.25" x="-5" y="-5" enabled="false" />
+
+
+	<!-- define a simple text style -->
+	<style name="text"
+		url="%SWFPATH%/plugins/textfield.swf"
+		children="false"
+		background="false"
+		border="false"
+		enabled="false"
+		/>
+		
+	
+
+	<!-- add a shadow to the text style, but only for HTML5, the Flash text rendering with shadows doesn't look good -->
+	<style name="text" devices="html5"
+		textshadow="0.1"
+		textshadowrange="4"
+		textshadowcolor="0x000000"
+		textshadowalpha="1.0"
+		/>
+
+
+	<!-- define another <krpano> element, but only for desktop and tablet devices -->
+	<krpano devices="desktop|tablet">
+
+	
+	
+
+	</krpano>
+
+
+	<!-- for mobile devices use an alternative smaller layout with fewer examples -->
+	<krpano devices="mobile">
+
+	</krpano>
+
+
+	<!-- resize the left and right containers manually to avoid overlappings because of rounding errors -->
+	<events name="exampleevents"
+	        onresize="mul(w1,stagewidth,0.5); roundval(w1); sub(w2,stagewidth,w1); copy(layer[bg1].width,w1); copy(layer[bg2].width,w2);"
+	        />
+
+
+	<action name="startup">
+		<!-- startup action (called from the onstart event) - slide-in the example-button-containers -->
+		delayedcall(0.5, slide_in_examples() );
+	</action>
+
+
+	<action name="loadexample">
+		<!-- clear the ondown, onclick events from the caller (to avoid double clicking) -->
+		set(ondown,null);
+		set(onclick,null);
+
+		<!-- first slide out the example button containers to left and to right -->
+		slide_out_examples();
+
+		<!-- then add an 'back' button with keep=true for returning to the start xml -->
+		add_back_button();
+
+		<!-- and finally load the given example (a bit delayed to see the slide out animation) -->
+		delayedcall(0.7, loadpano(%1, null, MERGE, BLEND(0.5)) );
+	</action>
+
+
+	<action name="slide_in_examples">
+		tween(layer[bg1].x, 0%, 0.5, easeOutQuint);
+		tween(layer[bg2].x, 0%, 0.5, easeOutQuint);
+		delayedcall(0.5,
+			tween(layer[text1].alpha, 1.0, 0.5, easeOutQuint);
+			tween(layer[text2].alpha, 1.0, 0.5, easeOutQuint);
+		  );
+	</action>
+
+	<action name="slide_out_examples">
+		tween(layer[bg1].x, -55%, 0.75, easeOutCubic);
+		tween(layer[bg2].x, -55%, 0.75, easeOutCubic);
+		tween(layer[bg1].alpha, 0, 0.75, easeOutCubic);
+		tween(layer[bg2].alpha, 0, 0.75, easeOutCubic);
+		tween(layer[text1].alpha, 0.0, 0.75, easeOutQuint);
+		tween(layer[text2].alpha, 0.0, 0.75, easeOutQuint);
+	</action>
+
+	<action name="add_back_button">
+		addlayer(backbutton);
+		layer[backbutton].loadstyle('button');
+		set(layer[backbutton].style, null);
+		set(layer[backbutton].keep, true);
+		set(layer[backbutton].html, 'BACK');
+		set(layer[backbutton].align, 'rightbottom');
+		set(layer[backbutton].x, 32);
+		set(layer[backbutton].y, 32);
+		set(layer[backbutton].width, 70);
+		set(layer[backbutton].height, 50);
+		ifnot(device.ie, set(layer[backbutton].roundedge, 20); );
+		set(layer[backbutton].zorder, 99999);
+		set(layer[backbutton].alpha, 0.0);
+		set(layer[backbutton].onloaded, delayedcall(1.0,tween(alpha,1.0)); );
+		set(layer[backbutton].ondown, 'set(ondown,null); resetkrpano(); loadpano(%SWFPATH%/krpano.xml,null,IGNOREKEEP,BLEND(1));' );
+	</action>
+
+
+	<action name="resetkrpano">
+		<!-- reset/clear everything from a previous example -->
+
+		<!-- remove all scene/data/action/events/style elements -->
+		set(scene.count, 0);
+		set(data.count, 0);
+		set(action.count, 0);
+		set(events.count, 0);
+		set(style.count, 0);
+
+		<!-- stop all timers/tweens -->
+		breakall();
+
+		<!-- if there is a soundinterface - stop all sounds -->
+		if(stopallsounds !== null, stopallsounds() );
+
+		<!-- remove all events -->
+		set(onstart, null);
+		set(events.onenterfullscreen, null);
+		set(events.onexitfullscreen, null);
+		set(events.onxmlcomplete, null);
+		set(events.onpreviewcomplete, null);
+		set(events.onloadcomplete, null);
+		set(events.onloaderror, null);
+		set(events.onnewpano, null);
+		set(events.onremovepano, null);
+		set(events.onkeydown, null);
+		set(events.onkeyup, null);
+		set(events.onviewchange, null);
+		set(events.onclick, null);
+		set(events.onmousedown, null);
+		set(events.onmouseup, null);
+		set(events.onmousewheel, null);
+		set(events.onidle, null);
+		set(events.onresize, null);
+
+		<!-- remove contextmenu items -->
+		set(contextmenu.item.count, 0);
+
+		<!-- remove custom cursors -->
+		set(cursors.url, null);
+		
+		<!-- set default control settings -->
+		set(control.mousetype, moveto);
+		set(control.touchtype, drag2d);
+
+		<!-- disable autorotate -->
+		set(autorotate.enabled, false);
+
+		<!-- reset area -->
+		set(area.x, 0);
+		set(area.y, 0);
+		set(area.width, 100%);
+		set(area.height, 100%);
+
+		<!-- enable flash10 -->
+		set(display.flash10, on);
+		
+		<!-- if defined delete the 'startscene' variable (used by many tours as startup setting) -->
+		delete(startscene);
+	</action>
+
+
+</krpano>
