@@ -1,0 +1,439 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+<title>Viewist Uygulaması</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta charset="utf-8">
+<meta name="format-detection" content="telephone=no" />
+
+
+<style>
+
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+		overflow:hidden;
+      }
+	  #panoramaBorders{
+display:none;
+position:absolute;left:0%;top:0%;width:100%;height:100%;background-color:black;z-index:49;
+	  }
+	  #panoramaWindow{
+	  position:absolute;background-color:black;z-index:50;height:100%;	
+	  }
+	  .closeButton{
+	  width:40px;height:40px;position:absolute;right:0px;top:0px;z-index:99999;
+	  }
+
+	  #map-canvas{
+	  left:0px;
+	  top:0px;
+	  margin: 0;
+        padding: 0;
+        height: 100%;
+		width:100%;
+		float:left;
+		overflow:hidden;
+	  }
+	  
+	          .scrollable {
+
+            overflow-y: scroll;
+            -webkit-overflow-scrolling: touch;
+        }
+.splash {
+   align: center;
+}
+</style>
+
+<script src="phonegap.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+<script type="text/javascript" src="scripts/krPano/swfkrpano.js"></script>
+<script type="text/javascript" src="scripts/krPano/krpanoiphone.js"></script>
+<link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+<link rel="stylesheet" href="http://code.jquery.com/mobile/1.3.1/jquery.mobile-1.3.1.min.css" />
+<script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+<script src="http://code.jquery.com/mobile/1.3.1/jquery.mobile-1.3.1.min.js"></script>
+<script>
+
+$(document).bind("mobileinit", function(){
+$.mobile.page.prototype.options.domCache = true ;
+$.mobile.allowCrossDomainPages = true;
+  $.mobile.loader.prototype.options.text = "loading";
+  $.mobile.loader.prototype.options.textVisible = false;
+  $.mobile.loader.prototype.options.theme = "a";
+  $.mobile.loader.prototype.options.html = "";
+});
+</script>
+</head>
+<body>
+
+<div id="mainPage" data-role='page' style="overflow:hidden;">
+<div id="loadBck" style="width:100%;height:100%;background-color:black;position:absolute;z-index:10001;"></div>
+<div id="infoPage" style="width:100%;height:100%;background-color:white;position:absolute;z-index:10000;display:none;">
+	<iframe id="infoPageFrame" src="" frameBorder="0"  style="width:100%;height:100%;">
+	</iframe>
+	<img class="closeButton" src="closeButton.png" onclick="closeInfoPage()"/>
+</div>
+
+<div id="panoramaBorders">
+	<iframe id="panoramaWindow" src="" frameBorder="0"></iframe>
+	<img class="closeButton" src="closeButton.png" onclick="closePanorama()"/>
+</div>
+<div data-role="panel" id="mypanel" data-position="right" data-display="overlay" data-theme="a">
+<div id="listC" class="scrollable">
+	<ul data-role="listview" data-theme="a">
+					<li>
+						<a href="#mypanel" onclick="goToMarker('Topkapı Sarayı')">
+							 <h3>Topkapı Sarayı</h3>
+						</a>
+					</li>
+									<li>
+						<a href="#mypanel" onclick="goToMarker('Ayasofya')">
+							 <h3>Ayasofya</h3>
+						</a>
+					</li>
+									<li>
+						<a href="#mypanel" onclick="goToMarker('Süleymaniye Camii')">
+							 <h3>Süleymaniye Camii</h3>
+						</a>
+					</li>
+									<li>
+						<a href="#mypanel" onclick="goToMarker('Sultanahmet')">
+							 <h3>Sultanahmet</h3>
+						</a>
+					</li>
+									<li>
+						<a href="#mypanel" onclick="goToMarker('Dolmabahçe Sarayı')">
+							 <h3>Dolmabahçe Sarayı</h3>
+						</a>
+					</li>
+									<li>
+						<a href="#mypanel" onclick="goToMarker('Yerebatan Sarnıcı')">
+							 <h3>Yerebatan Sarnıcı</h3>
+						</a>
+					</li>
+									<li>
+						<a href="#mypanel" onclick="goToMarker('Arkeoloji Müzesi')">
+							 <h3>Arkeoloji Müzesi</h3>
+						</a>
+					</li>
+									<li>
+						<a href="#mypanel" onclick="goToMarker('Kariye Müzesi')">
+							 <h3>Kariye Müzesi</h3>
+						</a>
+					</li>                <li>
+						<a href="#mypanel" onclick="goToMarker('Kapalı Çarşı')">
+							 <h3>Kapalı Çarşı</h3>
+						</a>
+					</li>
+									<li>
+						<a href="#mypanel" onclick="goToMarker('Kız Kulesi')">
+							 <h3>Kız Kulesi</h3>
+						</a>
+					</li>
+	</ul>
+</div>
+</div>
+<div id="pageContent" data-role="content" style="width:100%;height:100%;">
+<div id="mapC">
+	<div id="map-canvas" style="position:fixed;">
+	</div>
+</div>
+<div id="popupDiv" data-role="popup" data-transition="pop" data-theme="a">
+  <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+  <div id="popupContent"></div>
+ <div data-role="navbar" >
+                    <ul>
+                        <li>
+                            <button onclick="openPano()" data-role="button" data-inline="true"   data-icon="refresh" data-theme="a" data-corners="false">Panorama</button>
+                        </li>
+						<li>
+                            <button onclick="openInfo()" data-role="button" data-inline="true"   data-icon="info" data-theme="a" data-corners="false">Bilgi/Info</button>
+                        </li>
+                    </ul>
+</div>
+</div>
+</div>
+<div id="footer" data-role="footer" data-theme="a" data-position="fixed" data-tap-toggle="false">
+                <div data-role="navbar">
+                    <ul>
+                        <li>
+                            <a href="#mypanel" data-role="button" data-inline="true"   data-icon="grid" >Yerler/Places</a>
+                        </li>
+                    </ul>
+                </div>
+</div>
+</div>
+<div id="topkapiInfoDiv" style="display:none;">
+<img src='thumbs/topkapithumb.jpg' id="topkapiThumb"  style="z-index:54;position:relative;border:3px solid black;"/>
+<h3 style="position:absolute;left:10px;top:2px;z-index:55;">Topkapı Sarayı</h3>
+</div>
+
+<div id="ayasofyaInfoDiv" style="display:none;">
+<img src='thumbs/ayasofyathumb.jpg' id="ayasofyaThumb"  style="z-index:54;position:relative;border:3px solid black;"/>
+<h3 style="position:absolute;left:10px;top:2px;z-index:55;">Ayasofya</h3>
+</div>
+
+<div id="suleymaniyeInfoDiv" style="display:none;">
+<img src='thumbs/suleymaniyethumb.jpg' id="suleymaniyeThumb"  style="z-index:54;position:relative;border:3px solid black;"/>
+<h3 style="position:absolute;left:10px;top:2px;z-index:55;">Süleymaniye Camii</h3>
+</div>
+
+<div id="sultanahmetInfoDiv" style="display:none;">
+<img src='thumbs/sultanahmetthumb.jpg' id="sultanahmetThumb"  style="z-index:54;position:relative;border:3px solid black;"/>
+<h3 style="position:absolute;left:10px;top:2px;z-index:55;">Sultanahmet Camii</h3>
+</div>
+
+<div id="dolmabahceInfoDiv" style="display:none;">
+<img src='thumbs/dolmabahcethumb.jpg' id="dolmabahceThumb"  style="z-index:54;position:relative;border:3px solid black;"/>
+<h3 style="position:absolute;left:10px;top:2px;z-index:55;">Dolmabahçe Sarayı</h3>
+</div>
+
+<div id="yerebatanInfoDiv" style="display:none;">
+<img src='thumbs/yerebatanthumb.jpg' id="yerebatanThumb"  style="z-index:54;position:relative;border:3px solid black;"/>
+<h3 style="position:absolute;left:10px;top:2px;z-index:55;">Yerebatan Sarnıcı</h3>
+</div>
+
+<div id="arkeolojiInfoDiv" style="display:none;">
+<img src='thumbs/arkeolojithumb.jpg' id="arkeolojiThumb"  style="z-index:54;position:relative;border:3px solid black;"/>
+<h3 style="position:absolute;left:10px;top:2px;z-index:55;">Arkeoloji Müzesi</h3>
+</div>
+
+<div id="kariyeInfoDiv" style="display:none;">
+<img src='thumbs/kariyethumb.jpg' id="kariyeThumb"  style="z-index:54;position:relative;border:3px solid black;"/>
+<h3 style="position:absolute;left:10px;top:2px;z-index:55;">Kariye Müzesi</h3>
+</div>
+
+<div id="kapalicInfoDiv" style="display:none;">
+<img src='thumbs/kapalicthumb.jpg' id="kapalicThumb"  style="z-index:54;position:relative;border:3px solid black;"/>
+<h3 style="position:absolute;left:10px;top:2px;z-index:55;">Kapalı Çarşı</h3>
+</div>
+
+<div id="kizkulesiInfoDiv" style="display:none;">
+<img src='thumbs/kizkulesithumb.jpg' id="kizkulesiThumb"  style="z-index:54;position:relative;border:3px solid black;" />
+<h3 style="position:absolute;left:10px;top:2px;z-index:55;">Kız Kulesi</h3>
+</div>
+<script>
+var map;
+var currentPlace;
+var iconBase = 'https://maps.google.com/mapfiles/kml/shapes/';
+var myLatlng = new google.maps.LatLng(41.041962286345125, 29.014862060546854);
+var TPlace = function (name, lat, lon, panoUrl,infoDiv,infoPageUrl) {
+    this.name = name;
+    this.lat = lat;
+    this.lon = lon;
+    this.panoUrl = panoUrl;
+	this.infoDiv = infoDiv;
+	this.infoPageUrl=infoPageUrl;
+};
+var addMarker = function (place) {
+    var marker = new google.maps.Marker({
+        position: new google.maps.LatLng(place.lat, place.lon),
+        map: map,
+        icon: iconBase + 'schools_maps.png',
+		name: place.name
+    });
+	google.maps.event.addListener(marker, 'click', function () {
+	for (var i=0;i<placesArray.length;i++){
+		if(marker.name==placesArray[i].name){
+			currentPlace = placesArray[i];
+		}
+	}
+	$('#popupContent').html("");
+	map.panTo(marker.getPosition());
+    $('#popupContent').html($(place.infoDiv).html());
+    $("#popupDiv").popup("open");
+    });
+    return marker;
+}
+var topkapi = new TPlace("Topkapı Sarayı", 41.010631, 28.982767, "topkapiPano",'#topkapiInfoDiv',"infopages/topkapi.html");
+var ayasofya = new TPlace("Ayasofya", 41.008378, 28.98087, "ayasofyaPano",'#ayasofyaInfoDiv',"infopages/ayasofya.html");
+var suleymaniye = new TPlace("Süleymaniye Camii", 41.016749, 28.962459, "suleymaniyePano",'#suleymaniyeInfoDiv',"infopages/suleymaniye.html");
+var sultanahmet = new TPlace("Sultanahmet", 41.008119, 28.975609, "sultanahmetPano",'#sultanahmetInfoDiv',"infopages/sultanahmet.html");
+var dolmabahce = new TPlace("Dolmabahçe Sarayı", 41.039007, 28.999023, "dolmabahcePano",'#dolmabahceInfoDiv',"infopages/dolmabahce.html");
+var yerebatan = new TPlace("Yerebatan Sarnıcı", 41.008378, 28.977942, "yerebatanPano",'#yerebatanInfoDiv',"infopages/yerebatan.html");
+var arkeoloji = new TPlace("Arkeoloji Müzesi", 41.010852, 28.981622, "arkeolojiPano",'#arkeolojiInfoDiv',"infopages/arkeoloji.html");
+var kariye = new TPlace("Kariye Müzesi", 41.031303, 28.939167, "kariyePano",'#kariyeInfoDiv',"infopages/kariye.html");
+var kapalicarsi = new TPlace("Kapalı Çarşı", 41.010837, 28.968442, "kapalicPano",'#kapalicInfoDiv',"infopages/kapalic.html");
+var kizkulesi = new TPlace("Kız Kulesi", 41.021048, 29.004076, "kizkulesiPano",'#kizkulesiInfoDiv',"infopages/kizkulesi.html");
+
+var placesArray = [topkapi, ayasofya, suleymaniye, sultanahmet, dolmabahce, yerebatan, arkeoloji, kariye, kapalicarsi, kizkulesi];
+
+
+function initialize() {
+$.mobile.loading( 'show', {
+	text: 'Yükleniyor/Loading',
+	textVisible: true,
+	theme: 'a',
+	html: ""
+});
+    var mapOptions = {
+        zoom: 8,
+        center: new google.maps.LatLng(41.019089, 28.992477),
+        mapTypeId: google.maps.MapTypeId.HYBRID
+    };
+    map = new google.maps.Map(document.getElementById('map-canvas'),
+        mapOptions);
+    map.setZoom(14);
+    for (var i = 0; i < placesArray.length; i++) {
+        placesArray[i].marker = addMarker(placesArray[i]);
+    }
+    $("#pageContent").css({
+        "padding": "0px",
+        "margin": "0px",
+		'height': $(window).height()-$("#footer").height()
+    });
+    $("#panoramaWindow").width(($(window).width()));
+	$("#map-canvas").height($("#pageContent").height());
+	$("#infoPage").height($(window).height());
+	$("#infoPage").width($("#pageContent").width());
+	$("#infoPageFrame").height($(window).height());
+	$("#infoPageFrame").width($("#pageContent").width());
+	$("#listC").height($("#pageContent").height());
+	google.maps.event.trigger(map, 'resize');
+	setTimeout(function(){$.mobile.loading( 'hide');$("#loadBck").hide();},3000);
+	
+}
+
+google.maps.event.addDomListener(window, 'load', initialize);
+
+function krpano() {
+    return document.getElementById("krpanoSWFObject");
+}
+function embedpanorama(xmlName) {
+    embedpano({
+        swf: "scripts/krPano/krpano.swf",
+        xml: "scripts/krPano/" + xmlName,
+        target: "panoramaWindow",
+        passQueryParameters: true,
+        wmode: "direct",
+        onready: panoReady,
+        html5: "prefer+css3d",
+        mwheel: true
+    });
+}
+
+function openPano() {
+document.getElementById("panoramaWindow").src = "http://isee.noda.com.tr/panoramas/" + currentPlace.panoUrl + ".html";
+$("#popupDiv").popup("close");
+document.getElementById("map-canvas").style.display="none";
+document.getElementById("panoramaBorders").style.display="block";
+$("#footer").hide();
+}
+
+function panoReady() {}
+function closePanorama() {
+    document.getElementById("panoramaBorders").style.display="none";
+document.getElementById("map-canvas").style.display="block";
+$("#footer").show()
+}
+$(window).resize(function() {
+   $("#pageContent").css({
+        "padding": "0px",
+        "margin": "0px",
+		'height': $(window).height()-$("#footer").height()
+    });
+
+
+    $("#panoramaWindow").width(($(window).width()));
+	$("#map-canvas").height($("#pageContent").height());
+	$("#infoPage").height($(window).height());
+	$("#infoPage").width($("#pageContent").width());
+	$("#infoPageFrame").height($(window).height());
+	$("#infoPageFrame").width($("#pageContent").width());
+	$("#listC").height($("#pageContent").height());
+	google.maps.event.trigger(map, 'resize');
+});
+
+function goToMarker(placeName){
+for (var i=0;i<placesArray.length;i++){
+	if(placeName==placesArray[i].name){
+	currentPlace = placesArray[i];
+		map.panTo(currentPlace.marker.getPosition());
+		var content=$(currentPlace.infoDiv).html();
+		$('#popupContent').html(content);
+        $("#popupDiv").popup("open");
+		}
+	}
+
+}
+
+function openInfo(){
+$("#popupDiv").popup("close");
+	$("#infoPage").fadeIn();
+	$("#infoPageFrame").attr('src', currentPlace.infoPageUrl); 
+	$("#footer").hide();
+	}
+
+function closeInfoPage(){
+	$('#infoPage').fadeOut();
+	$("#footer").show();
+	
+}
+</script>
+<style>
+div.ui-loader.ui-body-a {
+    border: 1px solid         #2A2A2A /*{a-body-border}*/;
+    color:                     #FFF /*{a-body-color}*/;
+    font-weight: normal;
+    background-image:url('loaderbck.jpg');    
+	margin-left:-185px;
+	margin-top:-120px;
+	height:240px;
+	width:370px;
+	background-position:center center;
+	background-repeat: no-repeat;
+
+}
+
+.ui-shadow,
+.ui-btn-up-a,
+.ui-btn-hover-a,
+.ui-btn-down-a,
+.ui-body-b,
+.ui-btn-up-b,
+.ui-btn-hover-b,
+.ui-btn-down-b,
+.ui-bar-c,
+.ui-body-c,
+.ui-btn-up-c,
+.ui-btn-hover-c,
+.ui-btn-down-c,
+.ui-bar-c,
+.ui-body-d,
+.ui-btn-up-d,
+.ui-btn-hover-d,
+.ui-btn-down-d,
+.ui-bar-d,
+.ui-body-e,
+.ui-btn-up-e,
+.ui-btn-hover-e,
+.ui-btn-down-e,
+.ui-bar-e,
+.ui-overlay-shadow,
+.ui-shadow,
+.ui-btn-active,
+.ui-body-a,
+.ui-bar-a {
+ text-shadow: none;
+ box-shadow: none;
+ -webkit-box-shadow: none;
+}
+
+</style>
+
+        <div class="app">
+            <h1>Uygulama splash</h1>
+            <div id="deviceready" class="blink">
+                <p class="event listening">Connecting to Device</p>
+                <p class="event received">Device is Ready</p>
+            </div>
+        </div>
+		        <script type="text/javascript" src="js/index.js"></script>
+        <script type="text/javascript">
+            app.initialize();
+        </script>
+</body>
+</html>
